@@ -12,16 +12,24 @@
     <div class="central fade-in">
         <h1 class="titulo"><span>🦺</span> Sistema de Requisição de EPI</h1>
         <form action="{{ url_for('selecionar_epi') }}" method="get">
-            <button class="botao-principal pulse">Toque para requisitar o EPI</button>
+            <button class="botao-principal pulse" type="submit">Toque para requisitar o EPI</button>
         </form>
     </div>
 
-    <!-- MENU OCULTO -->
+    <!-- MENU OCULTO COM BOTÕES -->
     <div class="menu-secreto" id="menuSecreto">
-        <a href="{{ url_for('cadastro_funcionarios') }}">👷‍♂️ Cadastrar Funcionário</a>
-        <a href="{{ url_for('cadastro_epis') }}">📦 Cadastrar EPIs</a>
-        <a href="/historico">📋 Histórico</a> |
-        <a href="/relatorio_excel">📊 Relatório Excel</a>
+        <form action="{{ url_for('cadastro_funcionarios') }}" method="get">
+            <button type="submit">👷‍♂️ Cadastrar Funcionário</button>
+        </form>
+        <form action="{{ url_for('cadastro_epis') }}" method="get">
+            <button type="submit">📦 Cadastrar EPIs</button>
+        </form>
+        <form action="/historico" method="get">
+            <button type="submit">📋 Histórico</button>
+        </form>
+        <form action="/relatorio_excel" method="get">
+            <button type="submit">📊 Relatório Excel</button>
+        </form>
     </div>
 
     <!-- BOTÃO FLUTUANTE PARA O MENU -->
