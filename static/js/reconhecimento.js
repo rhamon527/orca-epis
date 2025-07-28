@@ -1,32 +1,47 @@
-window.onload = function () {
-    const video = document.getElementById('video');
-    const canvas = document.getElementById('canvas');
-    const imagemBase64 = document.getElementById('imagem_base64');
-    const form = document.getElementById('formBiometria');
+const video = document.getElementById('video');
+const canvas = document.getElementById('canvas');
+const imagemBase64 = document.getElementById('imagem_base64');
+const form = document.getElementById('formBiometria');
 
-    navigator.mediaDevices.getUserMedia({ video: true })
-        .then(stream => {
-            video.srcObject = stream;
+const faceMesh = new FaceMesh({
+  locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`,
+});
 
-            setTimeout(() => {
-                const context = canvas.getContext('2d');
+faceMesh.setOptions({
+  maxNumFaces: 1,
+  refineLandmarks: true,
+  minDetectionConfidence: 0.5,
+  minTrackingConfidence: 0.5,
+});
 
-                // 🔥 Reduz o tamanho para evitar erro 413
-                canvas.width = 320;
-                canvas.height = 240;
+faceMesh.onResults(onResults);
 
-                context.drawImage(video, 0, 0, canvas.width, canvas.height);
-                const imagem = canvas.toDataURL('image/jpeg', 0.8); // qualidade 80%
-                imagemBase64.value = imagem;
+const camera = new Camera(video, {
+  onFrame: async () => {
+    await faceMesh.send({ image: video });
+  },
+  width: 480,
+  height: 360,
+});
 
-                // Para a câmera
-                stream.getTracks().forEach(track => track.stop());
+camera.start();
 
-                // Envia automaticamente
-                form.submit();
-            }, 3000);
-        })
-        .catch(error => {
-            alert("Erro ao acessar a câmera: " + error);
-        });
+let capturado = false;
+
+function onResults(results) {
+  if (results.multiFaceLandmarks.length > 0 && !capturado) {
+    capturado = true;
+
+    // Captura imagem do vídeo e converte em base64
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const context = canvas.getContext('2d');
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    const imagem = canvas.toDataURL('image/jpeg');
+    imagemBase64.value = imagem;
+
+    camera.stop();
+    form.submit();
+  }
 }
