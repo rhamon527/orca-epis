@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>EPIs Vencidos</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .avisos-box {
+            max-width: 800px;
+            margin: 50px auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.2);
+        }
+
+        .avisos-box h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #d32f2f;
+        }
+
+        .aviso {
+            background-color: #fff3f3;
+            border: 1px solid #d32f2f;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .aviso strong {
+            color: #d32f2f;
+        }
+
+        .nenhum {
+            text-align: center;
+            color: #555;
+        }
+    </style>
+</head>
+<body class="tela-selecao">
+
+    <div class="avisos-box fade-in">
+        <h2>⚠️ EPIs Vencidos</h2>
+
+        {% if vencidos %}
+            {% for epi in vencidos %}
+                <div class="aviso">
+                    <p><strong>Nome:</strong> {{ epi.nome }}</p>
+                    <p><strong>CA:</strong> {{ epi.ca }}</p>
+                    <p><strong>Validade:</strong> {{ epi.validade.strftime('%d/%m/%Y') }}</p>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="nenhum">✅ Nenhum EPI vencido encontrado.</p>
+        {% endif %}
+    </div>
+
+</body>
+</html>

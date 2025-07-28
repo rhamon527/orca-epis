@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Selecionar EPIs</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="tela-selecao">
+
+    <div class="container-selecao fade-in">
+        <h1 class="titulo-epi">🧤 Selecione os EPIs Necessários</h1>
+
+        <form action="{{ url_for('captura') }}" method="get" onsubmit="return validarSelecao()">
+            <div class="lista-epis">
+                {% for epi in epis %}
+                    <label class="checkbox-custom">
+                        <input type="checkbox" name="epis" value="{{ epi.nome }}">
+                        <span class="checkmark"></span>
+                        <span class="epi-nome">{{ epi.nome }}</span>
+                        <span class="epi-ca">(CA: {{ epi.ca }})</span>
+                    </label>
+                {% endfor %}
+            </div>
+
+            <div class="box-botao">
+                <button type="submit" class="botao-principal pulse">Fazer Biometria</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        function validarSelecao() {
+            const checkboxes = document.querySelectorAll('input[name="epis"]:checked');
+            if (checkboxes.length === 0) {
+                alert("Por favor, selecione pelo menos um EPI.");
+                return false;
+            }
+            return true;
+        }
+    </script>
+
+</body>
+</html>

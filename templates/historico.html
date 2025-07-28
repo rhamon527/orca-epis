@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Histórico de Requisições</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .historico-box {
+            max-width: 900px;
+            margin: 30px auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.2);
+        }
+
+        .historico-box h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .historico-box form {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .historico-box input {
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            width: 300px;
+        }
+
+        .registro {
+            border-top: 1px solid #ddd;
+            padding-top: 15px;
+            margin-top: 15px;
+        }
+
+        .registro img {
+            max-width: 160px;
+            border-radius: 8px;
+            margin-top: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+        }
+
+        .voltar {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .voltar a {
+            text-decoration: none;
+            color: #007bff;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body class="tela-selecao">
+
+    <div class="historico-box fade-in">
+        <h2>📄 Histórico de Requisições</h2>
+
+        <form method="GET">
+            <input type="text" name="cpf" placeholder="Buscar por CPF" value="{{ request.args.get('cpf', '') }}">
+            <button class="botao-principal" type="submit">🔍 Buscar</button>
+        </form>
+
+        {% if registros %}
+    {% for r in registros %}
+        <div class="registro">
+            <p><strong>Nome:</strong> {{ r.nome }}</p>
+            <p><strong>CPF:</strong> {{ r.cpf }}</p>
+            <p><strong>Data:</strong> {{ r.data_hora }}</p>
+            <p><strong>EPIs:</strong> {{ r.epis }}</p>
+            <img src="{{ url_for('static', filename=r.foto.split('static/')[1]) }}" alt="Foto">
+        </div>
+    {% endfor %}
+{% else %}
+    <p style="text-align:center;">Nenhum registro encontrado.</p>
+{% endif %}
+
+
+        <div class="voltar">
+            <a href="/">🔙 Voltar para a tela inicial</a>
+        </div>
+    </div>
+
+</body>
+</html>

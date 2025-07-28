@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Requisição de EPI - ORCA</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body class="tela-inicial">
+
+    <!-- TÍTULO E BOTÃO CENTRAL -->
+    <div class="central fade-in">
+        <h1 class="titulo"><span>🦺</span> Sistema de Requisição de EPI</h1>
+        <form action="{{ url_for('selecionar_epi') }}" method="get">
+            <button class="botao-principal pulse">Toque para requisitar o EPI</button>
+        </form>
+    </div>
+
+    <!-- MENU OCULTO -->
+    <div class="menu-secreto" id="menuSecreto">
+        <a href="{{ url_for('cadastro_funcionarios') }}">👷‍♂️ Cadastrar Funcionário</a>
+        <a href="{{ url_for('cadastro_epis') }}">📦 Cadastrar EPIs</a>
+        <a href="/historico">📋 Histórico</a> |
+        <a href="/relatorio_excel">📊 Relatório Excel</a>
+    </div>
+
+    <!-- BOTÃO FLUTUANTE PARA O MENU -->
+    <div class="botao-menu" onclick="toggleMenu()">⋮</div>
+
+    <!-- SCRIPTS -->
+    <script>
+        function toggleMenu() {
+            document.getElementById('menuSecreto').classList.toggle('ativo');
+        }
+    </script>
+
+</body>
+</html>

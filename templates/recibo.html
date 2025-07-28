@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Recibo de Entrega</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .recibo {
+            max-width: 600px;
+            margin: 50px auto;
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+
+        .recibo img {
+            max-width: 220px;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+        }
+
+        .recibo h2 {
+            margin-bottom: 20px;
+        }
+
+        .recibo ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .recibo ul li {
+            margin-bottom: 5px;
+        }
+
+        .recibo .ok {
+            margin-top: 20px;
+            font-size: 18px;
+            color: green;
+        }
+
+        .voltar {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 12px 20px;
+            font-weight: bold;
+            background-color: #f3c623;
+            color: black;
+            border-radius: 8px;
+            text-decoration: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .voltar:hover {
+            background-color: #ffe55e;
+        }
+    </style>
+</head>
+<body class="tela-selecao">
+
+    <div class="recibo fade-in">
+        <h2>✅ Requisição de EPI Concluída</h2>
+
+        <p><strong>Nome:</strong> {{ nome }}</p>
+        <p><strong>CPF:</strong> {{ cpf }}</p>
+        <p><strong>Data/Hora:</strong> {{ data }}</p>
+
+        <h3>EPIs Entregues:</h3>
+        <ul>
+            {% for epi in epis %}
+                <li>🟡 {{ epi }}</li>
+            {% endfor %}
+        </ul>
+
+        <h3>Foto Capturada:</h3>
+        <img src="{{ url_for('static', filename=foto.split('static/')[1]) }}" alt="Foto capturada">
+
+        <div class="ok">✔️ Comprovante registrado com sucesso.</div>
+
+        <a href="{{ url_for('index') }}" class="voltar">🔙 Voltar ao Menu Inicial</a>
+    </div>
+
+</body>
+</html>
+
