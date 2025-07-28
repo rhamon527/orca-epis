@@ -1,29 +1,19 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <title>Confirmação</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <meta charset="UTF-8">
+  <title>Confirmação</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-<body class="tela-selecao">
-
-    <div class="container-selecao fade-in">
-        <h2>✅ Confirmação de Dados</h2>
-
-        <p><strong>Nome:</strong> {{ nome }}</p>
-        <p><strong>CPF:</strong> {{ cpf }}</p>
-
-        <h3>EPIs Selecionados:</h3>
-        <ul>
-            {% for epi in epis %}
-                <li>{{ epi }}</li>
-            {% endfor %}
-        </ul>
-
-        <form action="{{ url_for('recibo') }}" method="post">
-            <button class="botao-principal pulse">Requisitar EPI</button>
-        </form>
-    </div>
-
+<body>
+  <div class="container">
+    <h2>✅ Confirmar Dados</h2>
+    <p><strong>Nome:</strong> {{ funcionario.nome }}</p>
+    <p><strong>CPF:</strong> {{ funcionario.cpf }}</p>
+    <img src="{{ url_for('static', filename='imagens/fotos_capturadas/' + funcionario.foto) }}" width="200">
+    <form action="{{ url_for('requisitar') }}" method="post">
+      <button type="submit" class="botao-principal">Requisitar EPI</button>
+    </form>
+  </div>
 </body>
 </html>

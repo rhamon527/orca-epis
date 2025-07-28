@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Cadastro de Funcionário</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <div class="container">
+    <h2>👷 Cadastrar Novo Funcionário</h2>
+    <form action="{{ url_for('cadastro_funcionario') }}" method="post" enctype="multipart/form-data">
+      <input type="text" name="nome" placeholder="Nome completo" required>
+      <input type="text" name="cpf" placeholder="CPF" required>
+      <label>Foto (rosto do colaborador):</label>
+      <input type="file" name="foto" accept="image/*" required>
+      <button type="submit" class="botao-principal">Cadastrar</button>
+    </form>
+  </div>
+</body>
+</html>

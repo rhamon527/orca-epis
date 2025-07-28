@@ -1,46 +1,29 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <title>Requisição de EPI - ORCA</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;600&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <title>Requisição de EPI - ORCA</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body class="tela-inicial">
+  <div class="central">
+    <h1 class="titulo">🦺 Sistema de Requisição de EPI</h1>
+    <form action="{{ url_for('selecionar_epi') }}" method="get">
+      <button class="botao-principal pulse">Toque para requisitar o EPI</button>
+    </form>
+  </div>
 
-    <!-- TÍTULO E BOTÃO CENTRAL -->
-    <div class="central fade-in">
-        <h1 class="titulo"><span>🦺</span> Sistema de Requisição de EPI</h1>
-        <form action="{{ url_for('selecionar_epi') }}" method="get">
-            <button class="botao-principal pulse" type="submit">Toque para requisitar o EPI</button>
-        </form>
-    </div>
-
-    <!-- MENU OCULTO COM BOTÕES -->
-    <div class="menu-secreto" id="menuSecreto">
-        <form action="{{ url_for('cadastro_funcionarios') }}" method="get">
-            <button type="submit">👷‍♂️ Cadastrar Funcionário</button>
-        </form>
-        <form action="{{ url_for('cadastro_epis') }}" method="get">
-            <button type="submit">📦 Cadastrar EPIs</button>
-        </form>
-        <form action="/historico" method="get">
-            <button type="submit">📋 Histórico</button>
-        </form>
-        <form action="/relatorio_excel" method="get">
-            <button type="submit">📊 Relatório Excel</button>
-        </form>
-    </div>
-
-    <!-- BOTÃO FLUTUANTE PARA O MENU -->
-    <div class="botao-menu" onclick="toggleMenu()">⋮</div>
-
-    <!-- SCRIPTS -->
-    <script>
-        function toggleMenu() {
-            document.getElementById('menuSecreto').classList.toggle('ativo');
-        }
-    </script>
-
+  <!-- Menu oculto -->
+  <div class="menu-secreto">
+    <form action="{{ url_for('cadastro_funcionario') }}" method="get">
+      <button class="menu-botao">👷 Cadastrar Funcionário</button>
+    </form>
+    <form action="{{ url_for('cadastro_epi') }}" method="get">
+      <button class="menu-botao">🧤 Cadastrar EPI</button>
+    </form>
+    <form action="{{ url_for('historico') }}" method="get">
+      <button class="menu-botao">📋 Ver Histórico</button>
+    </form>
+  </div>
 </body>
 </html>

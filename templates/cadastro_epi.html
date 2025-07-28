@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Cadastro de EPI</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <div class="container">
+    <h2>🧤 Cadastrar Novo EPI</h2>
+    <form action="{{ url_for('cadastro_epi') }}" method="post">
+      <input type="text" name="nome" placeholder="Nome do EPI" required>
+      <input type="text" name="ca" placeholder="CA do EPI" required>
+      <button type="submit" class="botao-principal">Cadastrar</button>
+    </form>
+  </div>
+</body>
+</html>
