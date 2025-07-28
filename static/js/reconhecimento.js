@@ -1,47 +1,51 @@
-const video = document.getElementById('video');
-const canvas = document.getElementById('canvas');
-const imagemBase64 = document.getElementById('imagem_base64');
-const form = document.getElementById('formBiometria');
+const video = document.getElementById("video");
+const statusEl = document.getElementById("status");
 
-const faceMesh = new FaceMesh({
-  locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`,
-});
+// Carrega os modelos do face-api.js
+Promise.all([
+  faceapi.nets.tinyFaceDetector.loadFromUri('/static/models'),
+  faceapi.nets.faceLandmark68Net.loadFromUri('/static/models'),
+  faceapi.nets.faceRecognitionNet.loadFromUri('/static/models')
+]).then(iniciarCamera);
 
-faceMesh.setOptions({
-  maxNumFaces: 1,
-  refineLandmarks: true,
-  minDetectionConfidence: 0.5,
-  minTrackingConfidence: 0.5,
-});
+async function iniciarCamera() {
+  const stream = await navigator.mediaDevices.getUserMedia({ video: {} });
+  video.srcObject = stream;
+  statusEl.innerText = "📷 Câmera ligada, procurando rostos...";
 
-faceMesh.onResults(onResults);
+  video.addEventListener("play", async () => {
+    const canvas = faceapi.createCanvasFromMedia(video);
+    document.body.append(canvas);
+    const displaySize = { width: video.width, height: video.height };
+    faceapi.matchDimensions(canvas, displaySize);
 
-const camera = new Camera(video, {
-  onFrame: async () => {
-    await faceMesh.send({ image: video });
-  },
-  width: 480,
-  height: 360,
-});
+    // Carregar imagem de referência
+    const imagemReferencia = await faceapi.fetchImage("/static/images/referencia1.jpg");
+    const referenciaDescricao = await faceapi.computeFaceDescriptor(imagemReferencia);
+    const faceMatcher = new faceapi.FaceMatcher(referenciaDescricao);
 
-camera.start();
+    setInterval(async () => {
+      const detections = await faceapi
+        .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
+        .withFaceLandmarks()
+        .withFaceDescriptors();
 
-let capturado = false;
+      const resized = faceapi.resizeResults(detections, displaySize);
+      canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
 
-function onResults(results) {
-  if (results.multiFaceLandmarks.length > 0 && !capturado) {
-    capturado = true;
+      const resultados = resized.map(d =>
+        faceMatcher.findBestMatch(d.descriptor)
+      );
 
-    // Captura imagem do vídeo e converte em base64
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    const context = canvas.getContext('2d');
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      resultados.forEach((result, i) => {
+        const box = resized[i].detection.box;
+        const drawBox = new faceapi.draw.DrawBox(box, { label: result.toString() });
+        drawBox.draw(canvas);
 
-    const imagem = canvas.toDataURL('image/jpeg');
-    imagemBase64.value = imagem;
-
-    camera.stop();
-    form.submit();
-  }
+        statusEl.innerText = result.label.includes("unknown")
+          ? "❌ Pessoa não reconhecida"
+          : "✅ Pessoa reconhecida: " + result.label;
+      });
+    }, 1500);
+  });
 }
