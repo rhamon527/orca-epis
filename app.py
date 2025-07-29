@@ -4,6 +4,7 @@ from datetime import datetime
 import os
 import base64
 import uuid
+from models import Colaborador
 
 from models import Colaborador, EPI, Requisicao
 
@@ -80,27 +81,28 @@ def requisitar():
 
 # ------------------- CADASTRO DE FUNCIONÁRIO -------------------
 
-@app.route('/cadastro_funcionario', methods=['GET', 'POST'])
-def cadastro_funcionario():
+@app.route('/cadastrar_colaborador', methods=['GET', 'POST'])
+def cadastrar_colaborador():
     if request.method == 'POST':
         nome = request.form['nome']
+        funcao = request.form['funcao']
         cpf = request.form['cpf']
-
-        # 🔒 VERIFICA SE CPF JÁ EXISTE
-        if Funcionario.query.filter_by(cpf=cpf).first():
-            return "⚠️ CPF já cadastrado. Use outro.", 400
-
         foto = request.files['foto']
-        filename = secure_filename(f"{uuid.uuid4().hex}_{foto.filename}")
-        caminho = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        foto.save(caminho)
 
-        novo_funcionario = Funcionario(nome=nome, cpf=cpf, foto=filename)
-        db.session.add(novo_funcionario)
+        # salva a foto com o nome do CPF
+        if foto:
+            filename = secure_filename(f"{cpf}.jpg")
+            caminho_foto = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            foto.save(caminho_foto)
+
+        novo = Colaborador(nome=nome, funcao=funcao, cpf=cpf, foto=caminho_foto)
+        db.session.add(novo)
         db.session.commit()
-        return redirect(url_for('index'))
-    
-    return render_template('cadastro_funcionario.html')
+
+        return redirect(url_for('cadastrar_colaborador'))
+
+    return render_template('cadastrar_colaborador.html')
+
 
 # ------------------- CADASTRO DE EPI -------------------
 
