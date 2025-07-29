@@ -3,11 +3,12 @@ from datetime import datetime
 
 db = SQLAlchemy()
 
-class Funcionario(db.Model):
+class Colaborador(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(100), nullable=False)
+    funcao = db.Column(db.String(100), nullable=False)
     cpf = db.Column(db.String(20), unique=True, nullable=False)
-    foto = db.Column(db.String(100), nullable=False)  # nome do arquivo da foto
+    foto = db.Column(db.String(200))  # Caminho da foto (ex: static/fotos/12345678900.jpg)
 
 class EPI(db.Model):
     id = db.Column(db.Integer, primary_key=True)
