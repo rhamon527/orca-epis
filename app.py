@@ -37,12 +37,6 @@ def faces_list():
     arquivos = [f for f in os.listdir(folder) if f.endswith('.jpg')]
     return jsonify(arquivos)
 
-
-@app.route('/biometria', methods=['POST'])
-def biometria():
-    session['epis'] = request.form.getlist('epis')
-    return render_template('biometria.html')
-
 @app.route('/confirmacao', methods=['POST'])
 def confirmacao():
     imagem_base64 = request.form['imagem_base64'].split(',')[1]
