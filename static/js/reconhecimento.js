@@ -1,6 +1,9 @@
 const video = document.getElementById("video");
 const statusEl = document.getElementById("status");
 
+// Aqui virá a lista de CPFs (pode vir dinamicamente do Flask)
+const cpfs = ["12345678900", "98765432100"]; // Ex: nomes das fotos
+
 Promise.all([
   faceapi.nets.tinyFaceDetector.loadFromUri('/static/models'),
   faceapi.nets.faceLandmark68Net.loadFromUri('/static/models'),
@@ -8,14 +11,18 @@ Promise.all([
 ]).then(iniciarReconhecimento);
 
 async function carregarDescritores() {
-  const labels = ["Joao Silva", "Maria Souza"]; // pode vir dinamicamente via Flask
   const descritores = [];
 
-  for (const label of labels) {
-    const img = await faceapi.fetchImage(`/static/fotos_funcionarios/${label}.jpg`);
-    const deteccao = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor();
-    if (!deteccao) continue;
-    descritores.push(new faceapi.LabeledFaceDescriptors(label, [deteccao.descriptor]));
+  for (const cpf of cpfs) {
+    try {
+      const img = await faceapi.fetchImage(`/static/fotos_funcionarios/${cpf}.jpg`);
+      const deteccao = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor();
+      if (deteccao) {
+        descritores.push(new faceapi.LabeledFaceDescriptors(cpf, [deteccao.descriptor]));
+      }
+    } catch (error) {
+      console.warn("❌ Falha ao carregar imagem de:", cpf);
+    }
   }
 
   return descritores;
@@ -48,7 +55,7 @@ async function iniciarReconhecimento() {
         drawBox.draw(canvas);
         statusEl.innerText = bestMatch.label.includes("unknown") ?
           "❌ Pessoa não reconhecida" :
-          "✅ Pessoa reconhecida: " + bestMatch.label;
+          "✅ CPF reconhecido: " + bestMatch.label;
       }
     }, 1500);
   });
