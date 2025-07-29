@@ -1,62 +1,91 @@
 const video = document.getElementById("video");
 const statusEl = document.getElementById("status");
 
-// Aqui virá a lista de CPFs (pode vir dinamicamente do Flask)
-const cpfs = ["12345678900", "98765432100"]; // Ex: nomes das fotos
+let faceMatcher = null;
 
+// Carrega os modelos
 Promise.all([
-  faceapi.nets.tinyFaceDetector.loadFromUri('/static/models'),
-  faceapi.nets.faceLandmark68Net.loadFromUri('/static/models'),
-  faceapi.nets.faceRecognitionNet.loadFromUri('/static/models')
-]).then(iniciarReconhecimento);
+  faceapi.nets.tinyFaceDetector.loadFromUri("/static/models/tiny_face_detector"),
+  faceapi.nets.faceLandmark68Net.loadFromUri("/static/models/face_landmark_68"),
+  faceapi.nets.faceRecognitionNet.loadFromUri("/static/models/face_recognition")
+]).then(async () => {
+  statusEl.innerText = "🔄 Carregando fotos dos colaboradores...";
+  faceMatcher = await carregarColaboradores();
+  iniciarCamera();
+}).catch(err => {
+  console.error("Erro ao carregar modelos:", err);
+  statusEl.innerText = "❌ Erro ao carregar modelos.";
+});
 
-async function carregarDescritores() {
+// Carrega todos os rostos de static/faces/
+async function carregarColaboradores() {
+  const arquivos = [
+    "12345678900.jpg",
+    "98765432100.jpg"
+    // coloque aqui os CPFs dos colaboradores com a extensão exata da imagem
+  ];
+
   const descritores = [];
 
-  for (const cpf of cpfs) {
+  for (const nomeArquivo of arquivos) {
+    const cpf = nomeArquivo.split(".")[0];
     try {
-      const img = await faceapi.fetchImage(`/static/fotos_funcionarios/${cpf}.jpg`);
-      const deteccao = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor();
-      if (deteccao) {
-        descritores.push(new faceapi.LabeledFaceDescriptors(cpf, [deteccao.descriptor]));
+      const img = await faceapi.fetchImage(`/static/faces/${nomeArquivo}`);
+      const detections = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor();
+      if (!detections) {
+        console.warn(`❌ Rosto não detectado em: ${nomeArquivo}`);
+        continue;
       }
-    } catch (error) {
-      console.warn("❌ Falha ao carregar imagem de:", cpf);
+      descritores.push(new faceapi.LabeledFaceDescriptors(cpf, [detections.descriptor]));
+    } catch (err) {
+      console.error(`Erro ao carregar imagem ${nomeArquivo}:`, err);
     }
   }
 
-  return descritores;
+  return new faceapi.FaceMatcher(descritores);
 }
 
-async function iniciarReconhecimento() {
-  const faceMatcher = new faceapi.FaceMatcher(await carregarDescritores(), 0.6);
+async function iniciarCamera() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { width: 720, height: 560, facingMode: "user" }
+    });
+    video.srcObject = stream;
+    statusEl.innerText = "📷 Câmera ligada, procurando rostos...";
 
-  const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-  video.srcObject = stream;
-  statusEl.innerText = "📷 Câmera ligada, procurando rostos...";
+    video.addEventListener("play", () => {
+      const canvas = faceapi.createCanvasFromMedia(video);
+      document.body.appendChild(canvas);
+      const displaySize = { width: video.width, height: video.height };
+      faceapi.matchDimensions(canvas, displaySize);
 
-  video.addEventListener("play", () => {
-    const canvas = faceapi.createCanvasFromMedia(video);
-    document.body.append(canvas);
-    faceapi.matchDimensions(canvas, { width: video.width, height: video.height });
+      setInterval(async () => {
+        const detections = await faceapi
+          .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
+          .withFaceLandmarks()
+          .withFaceDescriptors();
 
-    setInterval(async () => {
-      const detections = await faceapi
-        .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
-        .withFaceLandmarks()
-        .withFaceDescriptors();
+        const resized = faceapi.resizeResults(detections, displaySize);
+        canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
 
-      const resized = faceapi.resizeResults(detections, { width: video.width, height: video.height });
-      canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
+        const results = resized.map(d => faceMatcher.findBestMatch(d.descriptor));
 
-      for (let d of resized) {
-        const bestMatch = faceMatcher.findBestMatch(d.descriptor);
-        const drawBox = new faceapi.draw.DrawBox(d.detection.box, { label: bestMatch.toString() });
-        drawBox.draw(canvas);
-        statusEl.innerText = bestMatch.label.includes("unknown") ?
-          "❌ Pessoa não reconhecida" :
-          "✅ CPF reconhecido: " + bestMatch.label;
-      }
-    }, 1500);
-  });
+        results.forEach((result, i) => {
+          const box = resized[i].detection.box;
+          const drawBox = new faceapi.draw.DrawBox(box, { label: result.toString() });
+          drawBox.draw(canvas);
+
+          if (result.label.includes("unknown")) {
+            statusEl.innerText = "❌ Pessoa não reconhecida";
+          } else {
+            statusEl.innerText = `✅ Pessoa reconhecida: CPF ${result.label}`;
+            console.log("Reconhecido:", result.label);
+          }
+        });
+      }, 1500);
+    });
+  } catch (err) {
+    console.error("Erro ao acessar câmera:", err);
+    statusEl.innerText = "❌ Erro ao acessar câmera.";
+  }
 }
