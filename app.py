@@ -5,7 +5,7 @@ import os
 import base64
 import uuid
 
-from models import db, Funcionario, EPI, Requisicao
+from models import Colaborador, EPI, Requisicao
 
 app = Flask(__name__)
 app.secret_key = 'segredo_top'
