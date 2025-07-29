@@ -2,18 +2,39 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
-  <title>Reconhecimento Facial</title>
+  <title>Reconhecimento Facial | ORCA</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <script defer src="https://cdn.jsdelivr.net/npm/face-api.js"></script>
+  <script defer src="{{ url_for('static', filename='js/reconhecimento.js') }}"></script>
+  <style>
+    .container {
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 30px;
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      text-align: center;
+    }
+
+    video {
+      border-radius: 10px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.3);
+    }
+
+    #status {
+      margin-top: 15px;
+      font-size: 1.1em;
+      font-weight: bold;
+      color: #333;
+    }
+  </style>
 </head>
 <body>
   <div class="container">
     <h2>📷 Reconhecimento facial em tempo real...</h2>
-    <video id="video" width="720" height="560" autoplay playsinline></video>
-    <div id="status"></div>
+    <video id="video" width="720" height="560" autoplay muted></video>
+    <div id="status">⏳ Aguardando ativação da câmera...</div>
   </div>
-
-  <!-- face-api -->
-  <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
-  <script defer src="{{ url_for('static', filename='js/reconhecimento.js') }}"></script>
 </body>
 </html>
