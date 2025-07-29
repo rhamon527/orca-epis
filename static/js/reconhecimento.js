@@ -1,16 +1,17 @@
-<script>
+<script defer>
 const video = document.getElementById("video");
 const statusEl = document.getElementById("status");
 
+// Carregar os modelos da face-api.js corretamente
 Promise.all([
-  faceapi.nets.tinyFaceDetector.loadFromUri('/static/models/tiny_face_detector'),
-  faceapi.nets.faceLandmark68Net.loadFromUri('/static/models/face_landmark_68'),
-  faceapi.nets.faceRecognitionNet.loadFromUri('/static/models/face_recognition')
+  faceapi.nets.tinyFaceDetector.loadFromUri('/static/models'),
+  faceapi.nets.faceLandmark68Net.loadFromUri('/static/models'),
+  faceapi.nets.faceRecognitionNet.loadFromUri('/static/models')
 ])
 .then(carregarFaces)
 .catch(err => {
   console.error("Erro ao carregar modelos:", err);
-  statusEl.innerText = "❌ Erro ao carregar modelos.";
+  if (statusEl) statusEl.innerText = "❌ Erro ao carregar modelos.";
 });
 
 async function carregarFaces() {
@@ -20,10 +21,19 @@ async function carregarFaces() {
   const descritoresRotulados = [];
 
   for (const nomeArquivo of arquivos) {
-    const label = nomeArquivo.replace(".jpg", ""); // CPF
-    const img = await faceapi.fetchImage(`/static/faces/${nomeArquivo}`);
-    const descritor = await faceapi.computeFaceDescriptor(img);
-    descritoresRotulados.push(new faceapi.LabeledFaceDescriptors(label, [descritor]));
+    try {
+      const label = nomeArquivo.replace(".jpg", "").replace(".jpeg", "").replace(".png", ""); // tira a extensão
+      const img = await faceapi.fetchImage(`/static/faces/${nomeArquivo}`);
+      const detection = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor();
+      if (!detection) {
+        console.warn(`⚠️ Nenhum rosto detectado em ${nomeArquivo}`);
+        continue;
+      }
+      const descritor = detection.descriptor;
+      descritoresRotulados.push(new faceapi.LabeledFaceDescriptors(label, [descritor]));
+    } catch (err) {
+      console.error(`Erro ao processar ${nomeArquivo}:`, err);
+    }
   }
 
   iniciarCamera(descritoresRotulados);
@@ -35,7 +45,7 @@ async function iniciarCamera(labeledDescriptors) {
       video: { width: 720, height: 560 }
     });
     video.srcObject = stream;
-    statusEl.innerText = "📷 Câmera ligada, procurando rostos...";
+    if (statusEl) statusEl.innerText = "📷 Câmera ligada, procurando rostos...";
     console.log("📷 Câmera ativada");
 
     video.addEventListener("play", async () => {
@@ -43,7 +53,7 @@ async function iniciarCamera(labeledDescriptors) {
       document.body.appendChild(canvas);
       const displaySize = { width: video.width, height: video.height };
       faceapi.matchDimensions(canvas, displaySize);
-      const faceMatcher = new faceapi.FaceMatcher(labeledDescriptors);
+      const faceMatcher = new faceapi.FaceMatcher(labeledDescriptors, 0.5);
 
       setInterval(async () => {
         const detections = await faceapi
@@ -63,16 +73,18 @@ async function iniciarCamera(labeledDescriptors) {
           const drawBox = new faceapi.draw.DrawBox(box, { label: result.toString() });
           drawBox.draw(canvas);
 
-          statusEl.innerText = result.label.includes("unknown")
-            ? "❌ Pessoa não reconhecida"
-            : "✅ Reconhecido CPF: " + result.label;
+          if (statusEl) {
+            statusEl.innerText = result.label.includes("unknown")
+              ? "❌ Pessoa não reconhecida"
+              : "✅ Reconhecido CPF: " + result.label;
+          }
         });
       }, 1500);
     });
 
   } catch (error) {
     console.error("Erro ao acessar a câmera:", error);
-    statusEl.innerText = "❌ Erro ao acessar a câmera.";
+    if (statusEl) statusEl.innerText = "❌ Erro ao acessar a câmera.";
   }
 }
 </script>
