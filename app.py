@@ -28,6 +28,14 @@ def selecionar_epi():
     epis = EPI.query.all()
     return render_template('selecionar_epi.html', epis=epis)
 
+@app.route('/faces-list')
+def faces_list():
+    import os
+    folder = os.path.join('static', 'faces')
+    arquivos = [f for f in os.listdir(folder) if f.endswith('.jpg')]
+    return jsonify(arquivos)
+
+
 @app.route('/biometria', methods=['POST'])
 def biometria():
     session['epis'] = request.form.getlist('epis')
